@@ -602,6 +602,9 @@
         // Inventario en Google Sheets: la página lee la hoja "Inventario Helados D' Panda".
         // Si la hoja no responde, se muestra la lista escrita en initFlavors() como respaldo.
         const INVENTORY_SHEET_ID = '1roIH_jVamf56ekp06s46vGdK_qHkly90Tm6nTsFmhF0';
+        // Dirección de la aplicación web de Apps Script que descuenta el stock al recibir un pedido.
+        // Si está vacía, los pedidos se envían por WhatsApp sin descontar inventario.
+        const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaUXcq0b_eiB57gZ-AcYEOZA0irFJAKLKAC1CxlkSZI4eL5CcoFdbys8XmvJUVtrq3Qg/exec';
 
         function parseCSV(text) {
             const rows = [];
@@ -965,7 +968,68 @@
             else addrInput.classList.add('hidden');
         }
 
-        function sendOrderToWhatsApp() {
+        // Unidades por sabor del carrito (las cajas cuentan 8 unidades del sabor elegido)
+        function cartUnitsByFlavor() {
+            const units = {};
+            cart.forEach(item => {
+                if (item.type === 'flavor') units[item.id] = (units[item.id] || 0) + item.qty;
+                if (item.type === 'promoBox') units[item.flavorId] = (units[item.flavorId] || 0) + item.boxesCount * 8;
+            });
+            return Object.keys(units).map(id => ({ id, qty: units[id] }));
+        }
+
+        // Revisa el stock con la hoja actual y, si alcanza, le pide al script que lo descuente.
+        // Devuelve { ok: true }, { ok: false, faltantes } o null si no se pudo comunicar con la hoja.
+        async function discountInventory(order) {
+            if (!ORDER_SCRIPT_URL) return null;
+            try {
+                await loadInventoryFromSheet();
+            } catch (err) {
+                console.warn('No se pudo revisar el inventario antes del pedido', err);
+            }
+            const faltantes = order.items
+                .map(item => ({ item, flavor: storeData.flavors.find(f => String(f.id) === String(item.id)) }))
+                .filter(x => !x.flavor || x.flavor.stock < x.item.qty)
+                .map(x => ({ id: x.item.id, nombre: x.flavor ? x.flavor.name : 'Sabor no disponible', disponible: x.flavor ? x.flavor.stock : 0 }));
+            if (faltantes.length) return { ok: false, faltantes };
+            try {
+                await postOrderWithHiddenForm(JSON.stringify(order));
+                return { ok: true };
+            } catch (err) {
+                console.warn('No se pudo descontar el inventario', err);
+                return null;
+            }
+        }
+
+        // Envía el pedido al script con un formulario oculto. Así funciona en cualquier navegador,
+        // porque no depende de permisos entre dominios. El cuerpo llega al script como el JSON del pedido.
+        function postOrderWithHiddenForm(json) {
+            return new Promise(resolve => {
+                const frameName = 'orderFrame' + Date.now();
+                const frame = document.createElement('iframe');
+                frame.name = frameName;
+                frame.style.display = 'none';
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.enctype = 'text/plain';
+                form.action = ORDER_SCRIPT_URL;
+                form.target = frameName;
+                form.style.display = 'none';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = json.slice(0, -1) + ',"_":"';
+                input.value = '"}';
+                form.appendChild(input);
+                document.body.appendChild(frame);
+                document.body.appendChild(form);
+                const done = () => { resolve(); setTimeout(() => { form.remove(); frame.remove(); }, 1000); };
+                frame.onload = done;
+                setTimeout(done, 8000);
+                form.submit();
+            });
+        }
+
+        async function sendOrderToWhatsApp() {
             if (cart.length === 0) {
                 alert('Tu carrito está vacío.');
                 return;
@@ -995,12 +1059,34 @@
             });
 
             message += `\n💰 *TOTAL: $${total.toLocaleString()}*\n\n¡Anapoima, Cundinamarca!`;
+            const whatsappUrl = `https://wa.me/${storeData.whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+            // La ventana se abre antes de esperar a la hoja para que el navegador no la bloquee
+            const waWindow = ORDER_SCRIPT_URL ? window.open('', '_blank') : null;
+            const result = await discountInventory({
+                cliente: name, telefono: phone, modalidad: mode,
+                direccion: mode === 'Solicitar domicilio' ? address : '',
+                notas: notes, total, items: cartUnitsByFlavor()
+            });
+
+            if (result && !result.ok && result.faltantes) {
+                if (waWindow) waWindow.close();
+                const lista = result.faltantes.map(f => `- ${f.nombre}: quedan ${f.disponible}`).join('\n');
+                alert(`Lo sentimos, no hay suficiente inventario:\n${lista}\n\nAjusta tu pedido e inténtalo de nuevo.`);
+                try { await loadInventoryFromSheet(); renderAll(); } catch (e) {}
+                return;
+            }
 
             cart = [];
             updateCartBadge();
             toggleCartModal();
 
-            window.open(`https://wa.me/${storeData.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+            if (waWindow) waWindow.location.href = whatsappUrl;
+            else window.open(whatsappUrl, '_blank');
+
+            if (result && result.ok) {
+                setTimeout(async () => { try { await loadInventoryFromSheet(); renderAll(); } catch (e) {} }, 4000);
+            }
         }
 
         function toggleAdminModal() {
