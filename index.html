@@ -183,13 +183,8 @@
                         <input type="text" id="searchInput" oninput="filterFlavors()" placeholder="Buscar sabor..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-amber-500">
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                        
-                          <button onclick="setCategoryFilter('todos')" id="filter-todos" class="category-btn bg-amber-500 text-amber-950 font-semibold px-4 py-2 rounded-xl text-xs transition-all shadow-sm">Todos (17)</button>
-                        <button onclick="setCategoryFilter('niños')" id="filter-niños" class="category-btn bg-gray-100 hover:bg-amber-100 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all">Niños</button>
-                        <button onclick="setCategoryFilter('adultos')" id="filter-adultos" class="category-btn bg-gray-100 hover:bg-amber-100 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all">Adultos</button>
-                        <!--
-                        <button onclick="setCategoryFilter('familia')" id="filter-familia" class="category-btn bg-gray-100 hover:bg-amber-100 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all">Familia</button>-->
+                    <div id="categoryButtons" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <!-- Los botones de categoría se crean con las categorías de la hoja de inventario -->
                     </div>
                 </div>
 
@@ -650,7 +645,7 @@
                     description: get('descripcion'),
                     price: toNumber(get('precio')),
                     stock: Math.max(0, Math.floor(toNumber(get('stock')))),
-                    category: (get('categoria') || 'todos').toLowerCase(),
+                    category: get('categoria') || 'todos',
                     image: !img ? './img/paratodos.jpeg' : (/^(https?:)?\/\//.test(img) || img.startsWith('./') ? img : './img/' + img),
                     active: get('activo').toUpperCase() !== 'NO'
                 };
@@ -698,6 +693,7 @@
             setEl('facebookSocialBtn', 'href', storeData.facebookUrl);
             setEl('tiktokSocialBtn', 'href', storeData.tiktokUrl);
 
+            renderCategoryButtons();
             renderFlavors();
             renderOtherProducts();
             populatePromoDropdown();
@@ -710,10 +706,11 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
             storeData.flavors.forEach(flavor => {
-                if (currentFilter !== 'todos' && flavor.category !== currentFilter) return;
+                if (currentFilter !== 'todos' && categoryKey(flavor.category) !== currentFilter) return;
                 if (searchTerm && !flavor.name.toLowerCase().includes(searchTerm) && !flavor.description.toLowerCase().includes(searchTerm)) return;
 
-                let badgeColor = flavor.category === 'niños' ? 'bg-pink-100 text-pink-800' : flavor.category === 'adultos' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800';
+                const catKey = categoryKey(flavor.category);
+                let badgeColor = catKey === 'ninos' ? 'bg-pink-100 text-pink-800' : catKey === 'adultos' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800';
 
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-2xl overflow-hidden shadow-sm border border-amber-100 flex flex-col justify-between transition-all hover:shadow-md';
@@ -744,12 +741,52 @@
             });
         }
 
-        function setCategoryFilter(category) {
-            currentFilter = category;
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.className = 'category-btn bg-gray-100 hover:bg-amber-100 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all';
+        // Compara categorías sin importar mayúsculas, tildes ni espacios extra ("Niños" = "ninos")
+        function categoryKey(category) {
+            return String(category || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+        }
+
+        function categoryLabel(category) {
+            const text = String(category || '').trim();
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        // Crea un botón por cada categoría que aparece en la hoja. "todos" significa "para todos" y solo sale en el botón Todos.
+        function renderCategoryButtons() {
+            const box = document.getElementById('categoryButtons');
+            if (!box) return;
+            const categories = [];
+            storeData.flavors.forEach(flavor => {
+                const key = categoryKey(flavor.category);
+                if (key && key !== 'todos' && !categories.some(c => c.key === key)) {
+                    categories.push({ key, label: categoryLabel(flavor.category) });
+                }
             });
-            document.getElementById(`filter-${category}`).className = 'category-btn bg-amber-500 text-amber-950 font-semibold px-4 py-2 rounded-xl text-xs transition-all shadow-sm';
+            if (currentFilter !== 'todos' && !categories.some(c => c.key === currentFilter)) currentFilter = 'todos';
+            const buttons = [{ key: 'todos', label: `Todos (${storeData.flavors.length})` }, ...categories];
+            box.innerHTML = '';
+            buttons.forEach(c => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = c.label;
+                btn.dataset.key = c.key;
+                btn.onclick = () => setCategoryFilter(c.key);
+                box.appendChild(btn);
+            });
+            highlightCategoryButton();
+        }
+
+        function highlightCategoryButton() {
+            document.querySelectorAll('#categoryButtons button').forEach(btn => {
+                btn.className = btn.dataset.key === currentFilter
+                    ? 'category-btn bg-amber-500 text-amber-950 font-semibold px-4 py-2 rounded-xl text-xs transition-all shadow-sm'
+                    : 'category-btn bg-gray-100 hover:bg-amber-100 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all';
+            });
+        }
+
+        function setCategoryFilter(category) {
+            currentFilter = categoryKey(category);
+            highlightCategoryButton();
             renderFlavors();
         }
 
