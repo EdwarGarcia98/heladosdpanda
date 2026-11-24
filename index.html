@@ -557,15 +557,15 @@
         let storeData = {
             whatsappNumber: "573168365216",
             promoBoxPrice: 52000,
-            logoImg: "Gemini_Generated_Image_81yf9h81yf9h81yf_2.jpeg",
-            heroImg: "Gemini_Generated_Image_81yf9h81yf9h81yf_2.jpeg",
+            logoImg: "./img/logo.jpeg",
+            heroImg: "./img/portada.jpeg",
             heroTitle: "¡Disfruta el sabor de la felicidad con Los Helados D’ Panda!",
             aboutText: "En Los Helados D’ Panda nos dedicamos a elaborar helados artesanales con dedicación y amor! Con variedad de sabores, seleccionamos cuidadosamente cada ingrediente para garantizar una frescura inigualable, creando momentos felices para niños, adultos y toda la familia.",
             eventTitle: "¡Festival de Halloween y Sabores Mágicos!",
             eventDesc: "Durante todo este mes disfrutas de nuestra edición limitada inspirada en Halloween. Ven disfrazado o pide tu caja especial de temporada con sorpresas y decoraciones exclusivas en Anapoima.",
             eventPrice: 52000,
             eventCardTitle: "Caja Misteriosa D' Panda",
-            eventImg: "Gemini_Generated_Image_81yf9h81yf9h81yf_2.jpeg",
+            eventImg: "./img/kids.jpeg",
             instagramUrl: "#",
             facebookUrl: "#",
             tiktokUrl: "#",
@@ -575,24 +575,25 @@
         function initFlavors() {
           // Lista personalizada con la estructura exacta para cada uno de los 17 sabores de Anapoima
             storeData.flavors = [
-                { id: 1, name: "Maracuyá", description: "Helado cremoso elaborado con maracuyá fresco de la región.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 2, name: "Chocolate", description: "Intenso chocolate artesanal con cacao seleccionado.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 3, name: "Fresa", description: "Fresas naturales seleccionadas con leche de calidad.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 4, name: "Ron con Pasas", description: "Exquisito helado artesanal con toque de ron y pasas maceradas.", price: 6500, stock: 20, category: "adultos", image: "./img/paratodos.jpeg" },
-                { id: 5, name: "limon", description: "Refrescante helado artesanal con el auténtico toque tropical.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 6, name: "Mora", description: "Fruta silvestre cosechada y procesada artesanalmente.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 7, name: "Arequipe", description: "Dulce de arequipe artesanal estilo casero.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 8, name: "Café", description: "Café especial de la región transformado en un helado único.", price: 6500, stock: 20, category: "adultos", image: "./img/paratodos.jpeg" },
-                { id: 9, name: "Guanábana", description: "Pulpa natural de guanábana con textura suave.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 10, name: "Chicle", description: "Ideal para los niños, sabor dulce y colorido.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 11, name: "piña colada", description: "Helado con crema de licor para mayores de edad.", price: 6500, stock: 20, category: "adultos", image: "./img/paratodos.jpeg" },
-                { id: 12, name: "Lulo", description: "Acidez perfecta del lulo fresco en un helado refrescante.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 13, name: "oreo", description: "Vainilla artesanal con trocitos crujientes de galleta.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 14, name: "Coco", description: "Trocitos de coco natural cultivado en tierra cálida.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" },
-                { id: 15, name: "bocadillo con queso", description: "Refrescante helado con trocitos de bocadillo con queso.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 16, name: "vainillla", description: "toque de vainilla cremosa.", price: 6500, stock: 20, category: "niños", image: "./img/paratodos.jpeg" },
-                { id: 17, name: "piña", description: "Refrescante helado artesanal con el auténtico toque tropical con trocitos de piña.", price: 6500, stock: 20, category: "todos", image: "./img/paratodos.jpeg" }
+                { id: 1, name: "Maracuyá", description: "Helado cremoso elaborado con maracuyá fresco de la región.", price: 6500, stock: 20, category: "todos", image: "./img/maracuya.jpeg" },
+                { id: 2, name: "Chocolate", description: "Intenso chocolate artesanal con cacao seleccionado.", price: 6500, stock: 20, category: "niños", image: "./img/chocolate.jpeg" },
+                { id: 3, name: "Fresa", description: "Fresas naturales seleccionadas con leche de calidad.", price: 6500, stock: 20, category: "todos", image: "./img/fresa.jpeg" },
+                { id: 4, name: "Ron con Pasas", description: "Exquisito helado artesanal con toque de ron y pasas maceradas.", price: 6500, stock: 20, category: "adultos", image: "./img/red-ronpasas.jpeg" },
+                { id: 5, name: "limon", description: "Refrescante helado artesanal con el auténtico toque tropical.", price: 6500, stock: 20, category: "todos", image: "./img/limon.jpeg" },
+                { id: 6, name: "Mora", description: "Fruta silvestre cosechada y procesada artesanalmente.", price: 6500, stock: 20, category: "todos", image: "./img/mora.jpeg" },
+                { id: 7, name: "Arequipe", description: "Dulce de arequipe artesanal estilo casero.", price: 6500, stock: 20, category: "niños", image: "./img/arequipe.jpeg" },
+                { id: 8, name: "Café", description: "Café especial de la región transformado en un helado único.", price: 6500, stock: 20, category: "adultos", image: "./img/cafe.jpeg" },
+                { id: 9, name: "Guanábana", description: "Pulpa natural de guanábana con textura suave.", price: 6500, stock: 20, category: "todos", image: "./img/guanabana.jpeg" },
+                { id: 10, name: "Chicle", description: "Ideal para los niños, sabor dulce y colorido.", price: 6500, stock: 20, category: "niños", image: "./img/chicle.jpeg" },
+                { id: 11, name: "piña colada", description: "Helado con crema de licor para mayores de edad.", price: 6500, stock: 20, category: "adultos", image: "./img/red-piñaco.jpeg" },
+                { id: 12, name: "Lulo", description: "Acidez perfecta del lulo fresco en un helado refrescante.", price: 6500, stock: 20, category: "todos", image: "./img/lulo.jpeg" },
+                { id: 13, name: "oreo", description: "Vainilla artesanal con trocitos crujientes de galleta.", price: 6500, stock: 20, category: "niños", image: "./img/oreo.jpeg" },
+                { id: 14, name: "Coco", description: "Trocitos de coco natural cultivado en tierra cálida.", price: 6500, stock: 20, category: "todos", image: "./img/coco.jpeg" },
+                { id: 15, name: "bocadillo con queso", description: "Refrescante helado con trocitos de bocadillo con queso.", price: 6500, stock: 20, category: "niños", image: "./img/bocadillo.jpeg" },
+                { id: 16, name: "vainillla", description: "toque de vainilla cremosa.", price: 6500, stock: 20, category: "niños", image: "./img/vainilla.jpeg" },
+                { id: 17, name: "piña", description: "Refrescante helado artesanal con el auténtico toque tropical con trocitos de piña.", price: 6500, stock: 20, category: "todos", image: "./img/piña.jpeg" }
             ];
+        }
         
         let otherProducts = [
             { id: 1, name: "Cono Wafer Especial", description: "Cono crujiente para acompañar tu helado.", price: 1500, stock: 50, image: "Gemini_Generated_Image_81yf9h81yf9h81yf_2.jpeg" },
@@ -608,27 +609,33 @@
             renderAll();
         });
 
+        // Asigna un valor solo si el elemento existe (algunas secciones están comentadas en el HTML)
+        function setEl(id, prop, value) {
+            const el = document.getElementById(id);
+            if (el) el[prop] = value;
+        }
+
         function renderAll() {
-            document.getElementById('navLogoImg').src = storeData.logoImg;
-            document.getElementById('heroMainImg').src = storeData.heroImg;
-            document.getElementById('heroTitle').textContent = storeData.heroTitle;
-            document.getElementById('aboutText').textContent = storeData.aboutText;
-            document.getElementById('storePhoneDisplay').textContent = `+${storeData.whatsappNumber}`;
-            document.getElementById('whatsappSocialBtn').href = `https://wa.me/${storeData.whatsappNumber}`;
-            document.getElementById('promoBoxPriceDisplay').textContent = `$${storeData.promoBoxPrice.toLocaleString()}`;
+            setEl('navLogoImg', 'src', storeData.logoImg);
+            setEl('heroMainImg', 'src', storeData.heroImg);
+            setEl('heroTitle', 'textContent', storeData.heroTitle);
+            setEl('aboutText', 'textContent', storeData.aboutText);
+            setEl('storePhoneDisplay', 'textContent', `+${storeData.whatsappNumber}`);
+            setEl('whatsappSocialBtn', 'href', `https://wa.me/${storeData.whatsappNumber}`);
+            setEl('promoBoxPriceDisplay', 'textContent', `$${storeData.promoBoxPrice.toLocaleString()}`);
 
             // Special Event Render
-            document.getElementById('eventTitle').textContent = storeData.eventTitle;
-            document.getElementById('eventDesc').textContent = storeData.eventDesc;
-            document.getElementById('eventImg').src = storeData.eventImg;
-            document.getElementById('eventCardTitle').textContent = storeData.eventCardTitle;
-            document.getElementById('heroEventBtnText').textContent = storeData.eventTitle.length > 20 ? "Especial del Mes" : storeData.eventTitle;
-            document.getElementById('eventBtnText').textContent = `Pedir ${storeData.eventCardTitle} ($${storeData.eventPrice.toLocaleString()})`;
+            setEl('eventTitle', 'textContent', storeData.eventTitle);
+            setEl('eventDesc', 'textContent', storeData.eventDesc);
+            setEl('eventImg', 'src', storeData.eventImg);
+            setEl('eventCardTitle', 'textContent', storeData.eventCardTitle);
+            setEl('heroEventBtnText', 'textContent', storeData.eventTitle.length > 20 ? "Especial del Mes" : storeData.eventTitle);
+            setEl('eventBtnText', 'textContent', `Pedir ${storeData.eventCardTitle} ($${storeData.eventPrice.toLocaleString()})`);
 
             // Social links render
-            document.getElementById('instagramSocialBtn').href = storeData.instagramUrl;
-            document.getElementById('facebookSocialBtn').href = storeData.facebookUrl;
-            document.getElementById('tiktokSocialBtn').href = storeData.tiktokUrl;
+            setEl('instagramSocialBtn', 'href', storeData.instagramUrl);
+            setEl('facebookSocialBtn', 'href', storeData.facebookUrl);
+            setEl('tiktokSocialBtn', 'href', storeData.tiktokUrl);
 
             renderFlavors();
             renderOtherProducts();
@@ -691,6 +698,7 @@
 
         function renderOtherProducts() {
             const grid = document.getElementById('otherProductsGrid');
+            if (!grid) return;
             grid.innerHTML = '';
             otherProducts.forEach(prod => {
                 const card = document.createElement('div');
@@ -719,6 +727,7 @@
 
         function populatePromoDropdown() {
             const select = document.getElementById('promoFlavorSelect');
+            if (!select) return;
             select.innerHTML = '';
             storeData.flavors.forEach(flavor => {
                 const opt = document.createElement('option');
