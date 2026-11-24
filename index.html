@@ -604,9 +604,70 @@
         let cart = [];
         let currentFilter = 'todos';
 
-        window.addEventListener('DOMContentLoaded', () => {
+        // Inventario en Google Sheets: la página lee la hoja "Inventario Helados D' Panda".
+        // Si la hoja no responde, se muestra la lista escrita en initFlavors() como respaldo.
+        const INVENTORY_SHEET_ID = '1roIH_jVamf56ekp06s46vGdK_qHkly90Tm6nTsFmhF0';
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], field = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                    if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+                    else if (c === '"') inQuotes = false;
+                    else field += c;
+                } else if (c === '"') inQuotes = true;
+                else if (c === ',') { row.push(field); field = ''; }
+                else if (c === '\n' || c === '\r') {
+                    if (c === '\r' && text[i + 1] === '\n') i++;
+                    row.push(field); rows.push(row); row = []; field = '';
+                } else field += c;
+            }
+            if (field !== '' || row.length) { row.push(field); rows.push(row); }
+            return rows;
+        }
+
+        function toNumber(value) {
+            const n = parseFloat(String(value).replace(/[^0-9.,-]/g, '').replace(/\./g, '').replace(',', '.'));
+            return isNaN(n) ? 0 : n;
+        }
+
+        async function loadInventoryFromSheet() {
+            const url = `https://docs.google.com/spreadsheets/d/${INVENTORY_SHEET_ID}/gviz/tq?tqx=out:csv&t=${Date.now()}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Hoja no disponible: ' + res.status);
+            const rows = parseCSV(await res.text()).filter(r => r.some(c => c.trim() !== ''));
+            if (rows.length < 2) throw new Error('La hoja está vacía');
+            const head = rows[0].map(h => h.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+            const col = name => head.indexOf(name);
+            const flavors = rows.slice(1).map((r, i) => {
+                const get = name => (col(name) >= 0 ? (r[col(name)] || '').trim() : '');
+                const img = get('imagen');
+                return {
+                    id: parseInt(get('id')) || 1000 + i,
+                    name: get('nombre'),
+                    description: get('descripcion'),
+                    price: toNumber(get('precio')),
+                    stock: Math.max(0, Math.floor(toNumber(get('stock')))),
+                    category: (get('categoria') || 'todos').toLowerCase(),
+                    image: !img ? './img/paratodos.jpeg' : (/^(https?:)?\/\//.test(img) || img.startsWith('./') ? img : './img/' + img),
+                    active: get('activo').toUpperCase() !== 'NO'
+                };
+            }).filter(f => f.name && f.active);
+            if (!flavors.length) throw new Error('No hay sabores activos en la hoja');
+            storeData.flavors = flavors;
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
             initFlavors();
             renderAll();
+            try {
+                await loadInventoryFromSheet();
+                renderAll();
+            } catch (err) {
+                console.warn('No se pudo leer el inventario de Google Sheets, se usa la lista de respaldo.', err);
+            }
         });
 
         // Asigna un valor solo si el elemento existe (algunas secciones están comentadas en el HTML)
@@ -660,7 +721,7 @@
                     <div class="relative h-48 bg-amber-50">
                         <img src="${flavor.image}" onerror="this.src='https://placehold.co/400x300/f59e0b/ffffff?text=${encodeURIComponent(flavor.name)}'" alt="${flavor.name}" class="w-full h-full object-cover">
                         <span class="absolute top-3 left-3 ${badgeColor} text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shadow-sm">${flavor.category}</span>
-                        <span class="absolute top-3 right-3 ${flavor.stock > 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'} text-[10px] font-bold px-2 py-0.5 rounded-full">Stock: ${flavor.stock}</span>
+                        <span class="absolute top-3 right-3 ${flavor.stock > 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'} text-[10px] font-bold px-2 py-0.5 rounded-full">${flavor.stock > 0 ? 'Stock: ' + flavor.stock : 'Agotado'}</span>
                     </div>
                     <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
                         <div class="space-y-1">
@@ -672,7 +733,7 @@
                                 <span class="text-[10px] text-gray-400 block">Precio unidad</span>
                                 <span class="font-extrabold text-amber-900 text-base">$${flavor.price.toLocaleString()}</span>
                             </div>
-                            <button onclick="addFlavorToCart(${flavor.id})" class="bg-amber-500 hover:bg-amber-600 text-amber-950 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                            <button onclick="addFlavorToCart(${flavor.id})" ${flavor.stock > 0 ? '' : 'disabled'} class="${flavor.stock > 0 ? 'bg-amber-500 hover:bg-amber-600 text-amber-950' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
                                 <i class="fa-solid fa-cart-plus"></i>
                                 <span>Agregar</span>
                             </button>
